@@ -1,0 +1,577 @@
+{% extends "main.html" %}
+
+
+
+
+{% block content %}
+    <style>
+        .pf-content {
+            width: 50%;
+            margin: 0 auto;
+            border: 1px solid lightgray;
+            padding: 30px 0 30px 0;
+            height: 500px;
+            
+        }
+
+        .form-flex {
+            display: flex;
+        }
+    
+        .next-form {
+            display: none;
+            margin-left: 30px;
+            overflow: scroll;
+            height: 450px;
+        }
+        
+        .next-form p {
+            margin: 10px 0 0 0;
+            font-size: 14px;
+        }
+    
+        .modal__bg {
+            background: rgba(0,0,0,0.6);
+            height: 1000vh;
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+        }
+    
+        .modal__content{
+            background: #fff;
+            left: 50%;
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%,-50%);
+            width: 40%;
+            border-radius: 10px;
+            z-index: 50;
+        }
+
+        #id_img {
+            display: none;
+        }
+
+        #image {
+            width: 100%;
+            display: none;
+        }
+    
+    
+        .show {
+            display: block;
+            position: fixed;
+        }
+
+
+        .img-content {
+            width: 100%;
+        }
+
+        #image-box {
+            align-items: center;
+            display: flex;
+        }
+        #image-box-list {
+            display: flex;
+        }
+
+        .il-content {
+            position: relative;
+            
+        }
+
+        .cross-mrk-content {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background-color: rgba(0,0,0,0.6);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+        }
+
+        .cross-mrk {
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .image-next, .image-back {
+            display: none;
+        }
+
+        #id_icon_plus {
+            display: flex;
+            margin-left: 30px;
+        }
+        .icon-plus {
+            display: none;
+        }
+
+
+        #editimage {
+            width: 100%;
+            display: none;
+        }
+
+        
+
+    </style>
+    {% if request.path == '/create-post/' %}
+    <div class="pf-content">
+        <div id="pf-modal">
+            <form action="" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-flex">
+                    <div class="img-content" id="img">
+                        <div id="select_image_btn">
+                            <h3>写真を選ぶ</h3>
+                        </div>
+                        <div id="input_image">
+                            <input type="file" accept="image/jpeg,image/heic,image/heif,video/mp4,video/quicktime" multiple id="id_img">
+                        </div>
+                        <div style="display: flex; height: 340px; overflow: hidden">
+                            <div id="image-box"></div>
+                        </div>
+                        
+                        <div style="display: flex; padding-top: 30px;">
+                            <div id="image-box-list"></div>
+                            <p id="id_icon_plus" style="align-items: center;"><i class="fas fa-plus-circle icon-plus fa-3x" style="color: rgba(0,0,0,0.6);"></i></p>
+
+                        </div>
+                        
+                        <p class="image-next">次へ</p>
+                        <p class="image-back">戻る</p>
+                    </div>
+                    <div class="next-form">
+                        <div class="title-content" id="title">
+                            <p style="margin: 0;">Title</p>
+                            {{form.title}}
+                        </div>
+                        <div class="local-content" id="local">
+                            <p>Local</p>
+                            {{form.local}}
+                        </div>
+                        <div class="place-content" id="place">
+                            <p>Prefecture</p>
+                            {{form.place}}
+                        </div>
+                        <div class="city-content" id="city">
+                            <p>City</p>
+                            {{form.city}}
+                        </div>
+                        <div class="campsite-content" id="campsite">
+                            <p>Campsite name</p>
+                            {{form.campsite}}
+                        </div>
+                        <div class="score-content" id="score">
+                            <p>Score</p>
+                            {{form.score}}
+                        </div>
+                        <div class="category-content" id="category">
+                            <p>Category</p>
+                            {{form.category}}
+                        </div>
+                        <div class="description-content" id="description">
+                            <p>Thoughts</p>
+                            {{form.description}}
+                            <input type="submit" value="submit" id="confirm-btn" class="not-visible" name="upload">
+                        </div>
+                    </div> 
+                </div>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <div class="pf-content">
+        <div id="pf-modal">
+            <form action="" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-flex">
+                    <div class="img-content" id="img">
+                        <div id="input_image">
+                            <input type="file" accept="image/jpeg,image/heic,image/heif,video/mp4,video/quicktime" multiple id="id_img">
+                        </div>
+                        <div style="display: flex; height: 340px; overflow: hidden">
+                            <div id="image-box">
+                                {% for img in post.img.all %}
+                                <img src="{{img.image.url}}" id="editimage" alt="">
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; padding-top: 30px;">
+                            <div id="image-box-list">
+                                {% for img in post.img.all %}
+                                <div class="il-content">
+                                    <div class="cross-mrk-content">
+                                        <i class="fas fa-times cross-mrk"></i>
+                                    </div>
+                                    <img src="{{img.image.url}}" width="110" height="110" style="object-fit: cover;" id="il">
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <p id="id_icon_plus" style="align-items: center;"><i class="fas fa-plus-circle edit-icon-plus fa-3x" style="color: rgba(0,0,0,0.6);"></i></p>
+
+                        </div>
+                        
+                        <p class="edit-image-next">次へ</p>
+                        <p class="image-back">戻る</p>
+                    </div>
+                    <div class="next-form">
+                        <div class="title-content" id="title">
+                            <p style="margin: 0;">Title</p>
+                            {{form.title}}
+                        </div>
+                        <div class="local-content" id="local">
+                            <p>Local</p>
+                            {{form.local}}
+                        </div>
+                        <div class="place-content" id="place">
+                            <p>Prefecture</p>
+                            {{form.place}}
+                        </div>
+                        <div class="city-content" id="city">
+                            <p>City</p>
+                            {{form.city}}
+                        </div>
+                        <div class="campsite-content" id="campsite">
+                            <p>Campsite name</p>
+                            {{form.campsite}}
+                        </div>
+                        <div class="score-content" id="score">
+                            <p>Score</p>
+                            {{form.score}}
+                        </div>
+                        <div class="category-content" id="category">
+                            <p>Category</p>
+                            {{form.category}}
+                        </div>
+                        <div class="description-content" id="description">
+                            <p>Thoughts</p>
+                            {{form.description}}
+                            <input type="submit" value="submit" id="confirm-btn" class="not-visible" name="upload">
+                        </div>
+                    </div> 
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+    
+    <script>
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);       
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        var csrftoken = getCookie('csrftoken');
+        function csrfSafeMethod(method) {
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+        $('.img-content h3').click(function() {
+            $('.img-content #id_img').click();
+            return false
+        });
+
+        const formData = new FormData();
+        $('#id_img').change(function() {
+            const input = document.getElementById('id_img');
+            const imageData = input.files[0];
+            const imageBox = document.getElementById('image-box');
+            const url = URL.createObjectURL(imageData);
+            const imageBoxList = document.getElementById('image-box-list');
+            imageBox.insertAdjacentHTML('beforeend', `<img src="${url}" id="image">`);
+            const imageBoxIndex =  $('#image-box img:last');
+            imageBoxIndex.css('display', 'block');
+            $('#image-box img').not(imageBoxIndex).css('display', 'none');
+            imageBoxList.insertAdjacentHTML('beforeend', `<div class="il-content"><div class="cross-mrk-content"><i class="fas fa-times cross-mrk"></i></div><img src="${url}" width="110" height="110" style="object-fit: cover;" id="il"></div>`);
+            $('.image-next').css('display', 'block');
+            $('.icon-plus').css('display', 'flex')
+            $('.icon-plus').css('align-items', 'center')
+            $('#select_image_btn h3').css('display', 'none')
+            formData.append('img', imageData);
+            input.value = '';
+        });
+
+
+        $(document).on({'mouseenter': function() {
+                $(this).children('div').css('opacity', '1');
+            },
+            'mouseleave': function() {
+                $(this).children('div').css('opacity', '0');
+            }
+        }, '.il-content');
+
+        $(document).on('click', '.cross-mrk-content', function() {
+            
+            var parent = $(this).parent();
+            const imageBoxListIndex = $('.il-content').index(parent);
+            var imageEq = $('#image-box img').eq(imageBoxListIndex);
+            if(imageEq.css('display') != 'none') {
+                if(1 <= imageBoxListIndex) {
+                    $('#image-box img').eq(imageBoxListIndex).css('display', 'block');
+                } else if($('#image-box img').length == 1) {
+                    $('#select_image_btn h3').css('display', 'block');
+                    $('.icon-plus').css('display', 'none');
+                    $('.image-next').css('display', 'none');
+                }
+            }
+            $(this).parent().remove();
+            imageEq.remove();
+            const formDataList = formData.getAll('img');
+            formDataList.splice(imageBoxListIndex, 1)
+            formData.delete('img');
+            $.each(formDataList, function(i, v) {
+                formData.append('img', v);
+            });
+            console.log(formData.getAll('img'))
+        
+        });
+
+        $(document).on('click', '.icon-plus', function() {
+            $('#id_img').click();
+        });
+
+        $(document).on('click', '.il-content', function() {
+            const url = $(this).children('img').attr('src')
+            const imageBox = document.getElementById('image-box');
+            var imageBoxListIndex = $('.il-content').index(this);
+            var imageBoxIndex = $('#image-box img').eq(imageBoxListIndex);
+            imageBoxIndex.css('display', 'block');
+            $('#image-box img').not(imageBoxIndex).css('display', 'none');
+            
+        });
+
+        $('.image-next').click(function() {
+            $('.img-content').css('width', '60%')
+            $('.next-form').css('display', 'block')
+            $('.pf-content').css('width', '70%')
+            $(this).css('display', 'none')
+            $('.icon-plus').css('display', 'none')
+            $('.cross-mrk-content').css('display', 'none')
+            $('.image-back').css('display', 'block')
+            $.ajax({
+                url: `{% url 'ajax_get_post_image' %}`,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json'
+            })
+            .done(function(response) {
+                console.log('OK')
+                
+            })
+        });
+        
+
+        /////edit
+
+        $('#editimage').first().css('display', 'block')
+        $('.edit-icon-plus').css('display', 'block')
+        $('.edit-image-next').css('display', 'block')
+
+        $('.edit-image-next').click(function() {
+            $('.img-content').css('width', '60%')
+            $('.next-form').css('display', 'block')
+            $('.pf-content').css('width', '70%')
+            $(this).css('display', 'none')
+            $('.edit-icon-plus').css('display', 'none')
+            $('.cross-mrk-content').css('display', 'none')
+            $('.image-back').css('display', 'block')
+            $.ajax({
+                url: `{% url 'ajax_get_post_image' %}`,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json'
+            })
+            .done(function(response) {
+                console.log('OK')
+                
+            })
+        });
+
+        $(document).on('click', '.edit-icon-plus', function() {
+            $('#id_img').click();
+        });
+        //////
+
+
+        $('.image-back').click(function() {
+            $('.icon-plus').css('display', 'flex');
+            $('.image-next').css('display', 'block');
+            $(this).css('display', 'none');
+            $('.next-form').css('display', 'none');
+            $('.img-content').css('width', '100%');
+            $('.pf-content').css('width', '50%');
+            $.ajax({
+                url: `{% url 'ajax_back_post_image' %}`,
+                type: 'POST',
+                data: '',
+                processData: false,
+                contentType: false,
+                dataType: 'json'
+            })
+            .done(function(response) {
+                console.log('OK')
+            })
+        });
+
+
+
+
+        const local = $('#id_local');
+        const place = $('#id_place');
+        const changePlace = (select) => {
+            place.children().remove();
+            $("#id_place").append("<option value='0'>---------</option>");
+            $.ajax({
+                url: `{% url 'ajax_get_place' %}`,
+                type: 'GET',
+                data: {
+                    'pk': local.val(),
+                }
+            }).done(response => { 
+                for (const category of response.placeList) {
+                    const option = $('<option>');
+                    option.val(category['pk']);
+                    option.text(category['place']);
+                    place.append(option);
+                }
+                if (select !== undefined) {
+                    place.val(select);
+                }
+            });
+        };
+
+        local.on('change', () => {
+            changePlace();
+        });
+
+        if (local.val()) {
+            const selectedPlace = local.val();
+            changeCategory(selectedPlace);
+        }
+
+
+
+
+
+        
+        $(function() {
+            const place = $('#id_place');
+            const city = $('#id_city');
+            const changeCity = (select) => {
+                city.children().remove();
+                $("#id_city").append("<option value='0'>---------</option>");
+                $.ajax({
+                    url: `{% url 'ajax_get_city' %}`,
+                    type: 'GET',
+                    data: {
+                        'pk': place.val(),
+                    }
+                }).done(response => { 
+                    for (const category of response.categoryList) {
+                        const option = $('<option>');
+                        option.val(category['pk']);
+                        option.text(category['city']);
+                        city.append(option);
+                    }
+                    if (select !== undefined) {
+                        city.val(select);
+                    }
+                });
+                };
+
+            place.on('change', () => {
+                changeCity();
+            });
+            
+            if (place.val()) {
+                const selectedCategory = city.val();
+                changeCategory(selectedCategory);
+            }
+        });
+
+        
+        
+
+
+
+
+
+        const city = $('#id_city');
+        const campsite = $('#id_campsite');
+
+        const changeCampsite = (select) => {
+       
+            campsite.children().remove();
+            $("#id_campsite").append("<option value='0'>---------</option>");
+            $.ajax({
+                url: `{% url 'ajax_get_campsite' %}`,
+                type: 'GET',
+                data: {
+                    'pk': city.val(),
+                }
+            }).done(response => {
+                
+                for (const category of response.campsiteList) {
+                    const option = $('<option>');
+                    option.val(category['pk']);
+                    option.text(category['campsite']);
+                    campsite.append(option);
+                }
+
+                
+                if (select !== undefined) {
+                    campsite.val(select);
+                }
+
+            });
+            };
+
+        city.on('change', () => {
+            changeCampsite();
+        });
+
+        
+        if (city.val()) {
+            const selectedCampsite = campsite.val();
+            changeCategory(selectedCampsite);
+        }
+
+
+
+        
+
+
+
+    </script>
+
+{% endblock content %}

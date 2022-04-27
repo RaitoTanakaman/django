@@ -1,0 +1,133 @@
+
+  
+
+<div class="navbar-col">
+    <div class="navbar-left">
+        {% if request.user.is_authenticated %}
+          
+        
+        <a href="/">
+            <div class="logo-container">
+                <img src="../static/images/camgo.png" alt="Camgo logo" width="59" height="59">
+                <h4>Camgo</h4>
+            </div>
+            
+        </a>
+         {% endif %}
+    </div>
+    <div class="navbar-right" style="position:  relative;">
+        {% if request.user.is_authenticated %}
+          
+        
+        <form action="{% url 'home' %}" method="GET">
+            <input type="text" name="q" placeholder="なにをお探しですか？" />
+            <button type="submit"><i class="fas fa-search"></i></button>
+        </form>
+        {% endif %}
+    </div>
+    <div class="navbar-right">
+        {% if request.user.is_authenticated %}
+            <a href="{% url 'favorite-post' %}" ><i class="far fa-heart"></i></a>
+        {% endif %}
+    </div>
+    <div class="navbar-right">
+        {% if request.user.is_authenticated %}
+            <a href="{% url 'create-post' %}"><i class="far fa-plus-square"></i></a>
+        {% endif %}
+        
+    </div>
+    <div class="notification-ddm-container" data-hash="/notification">
+        <div class="noti-mmd-bg close"></div>
+        <div class="notification-ddm">
+            {% include "base/notification.html" %}
+        </div>
+    </div>
+    <div class="navbar-right" style="position: relative;">
+        {% if request.user.is_authenticated %}
+          
+       
+            <form action="{% url 'notification-view' %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" id="noti-dd-btn" style="top: -2px; right: 8px;"><i class="fas fa-bell"></i></button>
+            </form>
+        
+            
+        {% for notification in notifications %}
+            {% if last_time.time < notification.created %}
+                {% if notification.server != notification.receiver %}
+                    <div class="notification-mrk">
+                        <p style="margin: 0; font-size: 11px; color: #fff;"><strong>{{count}}</strong></p>
+                    </div>
+                {% endif %}
+            {% endif %}
+            
+        {% endfor %}
+        {% endif %}
+    </div>
+    <div class="navbar-right">
+        {% if request.user.is_authenticated %}
+        <ul class="menu_list" style="padding: 5px 10px;">
+            <li class="nav_item">
+                <a href="#" class="js-dropdown">
+                    <div class="navbar-flex">
+                        <div class="navbar-user">
+                            <img src="{{request.user.avatar.url}}" alt="" height="42" width="42" style="object-fit: cover;">
+                        </div>
+                        <div class="navbar-user">
+                            {% if '' == request.user.name %}
+                            <p style="text-align: left; padding-top: 2px; height: 24px;"></p>
+                            {% else %}
+                            <p style="text-align: left; padding-top: 2px;"><strong>{{request.user.name}}</strong></p>
+                            {% endif %}
+                            <p style="line-height: 10px"><small>@{{request.user.username | truncatechars:10}}</small></p>
+                        </div>
+                        <div class="navbar-user" style="padding-top: 10px;">
+                            <lottie-player src="https://assets8.lottiefiles.com/packages/lf20_j9cjpfwq.json"  background="transparent"  speed="1"  style="width: 25px; height: 25px;"  loop  autoplay></lottie-player>
+                        </div> 
+                    </div>
+                    
+                </a>
+                <div class="panel panel-nav js-dropdown-menu">
+                    <ul class="panel-inner">
+                        <li class="panel_item">
+                            <a href="{% url 'logout' %}">
+                                <div class="navbar-flex">
+                                    <div>
+                                        <lottie-player src="https://assets1.lottiefiles.com/packages/lf20_no3fovar.json" background="transparent" speed="1" style="width:24px; height:24px; padding-right: 20px;" loop autoplay></lottie-player>
+                                    </div>
+                                    <div>
+                                        Logout
+                                    </div>
+                                </div>
+                                
+                            </a>
+                        </li>
+                        <li class="panel_item">
+                            <a href="{% url 'user-profile' request.user.username %}">
+                                <div class="navbar-flex">
+                                    <div>
+                                        <lottie-player src="https://assets6.lottiefiles.com/packages/lf20_SgQLT9.json"  background="transparent"  speed="1"  style="width: 23px; height: 23px; padding-right: 21px;" loop  autoplay></lottie-player>
+                                    </div>
+                                    <div>
+                                        Profile
+                                    </div>
+                                </div>
+                                
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+            
+        {% else %}
+        {% if request.path == login or request.path == register %}
+        <a href="{% url 'login' %}">Login</a>
+        {% endif %}
+        {% endif %}
+    </div>
+
+</div>
+
+
+

@@ -1,0 +1,435 @@
+{% extends "main.html" %}
+{% load post_extras %}
+{% load static %}
+
+
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'styles/post.css' %}">
+</head>
+<div class="post-container">
+    <div>
+        {% include "base/search_component.html" %}
+    </div>
+    <div class="post-right">
+        
+        <div class="post-img">
+            {% for img in post_images %}
+            <div class="post-img-box" id="pi_box" style="width: 80%;">
+                <div id="btn_left">
+                    <i class="fas fa-arrow-circle-left"></i>
+                </div>
+                <img src="{{img.image.url}}" alt="" height="100%">
+                <div id="btn_right">
+                    <i class="fas fa-arrow-circle-right"></i>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div>
+            <div>
+                <div class="post-like-users-container" id="pluc">
+                    {% include "base/post_liked_users.html" %}
+                </div>
+            </div>
+            <h2>{{post.title}}</h2>
+            <div class="place">
+                <p>{{post.place}} {{post.city}} {{post.campsite.campsite}}</p>
+            </div>
+            <div>
+                <a href="{% url 'user-profile' post.host.username %}">
+                    <img src="{{post.host.avatar.url}}" width="24" height="24" alt="" style="border-radius: 50%; vertical-align: top; margin-right: 5px;">
+                    {{post.host}}
+                </a>
+            </div>
+            
+            <p>{{post.description|hashchange|profilechange}}</p>
+            <p>{{post.place}}</p>
+            <div style="display: flex;">
+                <div class="plu-users-img" style="display: flex; cursor: pointer;" onClick='showLikedUsers()'>
+                    {% if plu_one %}
+                    <div class="plu-img">
+                        <img src="{{plu_one.avatar.url}}" height="24" width="24" style="position: relative; z-index: 10;">
+                    </div>
+                    {% endif %}
+                    {% if plu_two %}
+                    <div class="plu-img">
+                        <img src="{{plu_two.avatar.url}}" height="24" width="24" style="position: relative; margin-left: -14px; z-index: 9;">
+                    </div>
+                    {% endif %}
+                    {% if plu_three %}
+                    <div class="plu-img">
+                        <img src="{{plu_three.avatar.url}}" height="24" width="24" style="position: relative; margin-left: -14px; z-index: 8;">
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="plu-count">
+                    {% if plu_one and post_liked_users_count == 1 %}
+                    <p><a href="{% url 'user-profile' plu_one.username %}">{{plu_one}}</a> が「いいね！」しました</p>
+                    {% elif not plu_one %}
+                    <p>{{post_liked_users_count}}人が「いいね！」しました。</p>
+                    {% else %}
+                    <p><a href="{% url 'user-profile' plu_one.username %}">{{plu_one}}</a>、他{{post_liked_users_count}}人が「いいね！」しました。</p>
+                {% endif %}
+                </div>
+            </div>
+
+            {% if request.user.is_authenticated %}
+                <div class="comment-form">
+                    <form action="" class="comment-form" method="POST">
+                        {% csrf_token %}
+                        <input type="text" class="comment-textbox" name="comment" placeholder="メッセージを入力">
+                        <input type="submit" value="Submit">
+                    </form>
+                </div>
+                <div class="reply-form d-none">
+                    <form action="" class="reply-comment" method="POST" >
+                        {% csrf_token %}
+                        <input type="hidden" class="parent-pk" name="parent-pk">
+                        <input type="text" class="reply-textbox" name="reply" placeholder="メッセージを入力">
+                        <input type="submit" value="Submit">
+                    </form>
+                </div>
+            {% endif %}
+
+
+            <div class="comment-wrapper">
+                {% for message in post_messages %}
+                    {% if not message.parent %}
+                        <div class="message-container">
+                            <div style="padding-right: 18px;">
+                                <img src="{{message.user.avatar.url}}" width="32" height="32" alt="" style="border-radius: 50%; background: #fff;">
+                            </div>
+                            <div>
+                                <a href="{% url 'user-profile' message.user %}" style="padding: 0 4px 0 0; font-size: 14px;"><strong>{{message.user}}</strong></a>
+                                <p class="message-body" style="font-size: 14px; display: inline; overflow-wrap: break-word; word-break: break-all;">{{message.body|hashchange|profilechange}}</p>
+                                <div style="display: flex; margin-top: 16px;">
+                                    <p style="font-size: 12px;">{{message.created|timesince|split_timesince:","}}前</p>
+                                    <p class="reply" id="{{message.user}}" onclick="commentReplyToggle('{{message.pk}}')" style="font-size: 12px;"><strong>Reply</strong></p>
+                                    <ul class="message_menu_list" style="padding-left: 10px;">
+                                        <li class="message_nav_item">
+                                            <p class="message-dropdown" style="margin: 0;  cursor: pointer;"><i class="fas fa-ellipsis-h" style="color: gray; vertical-align: top;"></i></p>
+                                            <div class="message-panel message-dropdown-menu" style="z-index: 30;">
+                                                <ul class="panel-inner">
+                                                    {% if request.user == message.user %}
+                                                    <li class="panel_item"><a href="{% url 'delete-message' message.id %}"><i class="fas fa-trash-alt" style="padding-right: 10px; color: gray;"></i>Delete</a></li>
+                                                    {% endif %}
+                                                    <li class="panel_item"><a href=""><i class="fas fa-exclamation-circle" style="padding-right: 10px; color: gray;"></i>Report</a></li>
+                                                </ul>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% for mp in message_parent %}
+                        {% if mp.parent == message %}
+                            <div class="reply-container">
+                                <div style="padding-right: 18px;">
+                                    <img src="{{mp.user.avatar.url}}" width="32" height="32" alt="" style="border-radius: 50%; background: #fff;">
+                                </div>
+                                <div>
+                                    <a href="{% url 'user-profile' mp.user %}" style="padding: 0 4px 0 0; font-size: 14px;"><strong>{{mp.user}}</strong></a>
+                                    
+                                    <span class="reply-body" style="font-size: 14px; display: inline; overflow-wrap: break-word; word-break: break-all;">{{mp.body|hashchange|profilechange}}</span>
+                                    
+                                    <div style="display: flex; padding-top: 16px;">
+                                        <p style="font-size: 12px;">{{mp.created|timesince|split_timesince:","}}前</p>
+                                        <p class="reply" id="{{mp.user}}" onclick="commentReplyToggle('{{mp.pk}}')" style="font-size: 12px; margin-left: 10px;"><strong>Reply</strong></p>
+                                        <ul class="reply_menu_list" style="padding-left: 10px; display: inline-block;">
+                                            <li class="reply_nav_item">
+                                                <p class="reply-dropdown" style="margin: 0;  cursor: pointer;"><i class="fas fa-ellipsis-h" style="color: gray; vertical-align: top;"></i></p>
+                                                <div class="reply-panel reply-dropdown-menu" style="z-index: 30;">
+                                                    <ul class="panel-inner">
+                                                        {% if request.user == mp.user %}
+                                                        <li class="panel_item"><a href="{% url 'delete-message' mp.id %}"><i class="fas fa-trash-alt" style="padding-right: 10px; color: gray;"></i>Delete</a></li>
+                                                        {% endif %}
+                                                        <li class="panel_item"><a href=""><i class="fas fa-exclamation-circle" style="padding-right: 10px; color: gray;"></i>Report</a></li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            </div>
+            
+            <div id="map" style="width:400px; height:320px"></div>
+
+
+            
+        </div>
+        
+        
+    </div>
+    <div id="brisk-map" class="brisk-map"></div>
+    
+</div>
+<script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyClfcwgPYqCtYvepDoqf0IVq675UxB_-R4&callback=initMap"></script>
+<script>
+
+    function initMap() {
+        
+        const latitude = JSON.parse('{{post_campsite_latitude|safe}}');
+        const longitude = JSON.parse('{{post_campsite_longitude|safe}}');
+        var latlng = new google.maps.LatLng(latitude, longitude);
+        var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 12,
+            center: latlng
+        });
+
+        function success(pos) {
+            var lat = pos.coords.latitude;
+            var lng = pos.coords.longitude;
+            var latlng_now = new google.maps.LatLng(lat, lng);
+            var directionsService = new google.maps.DirectionsService();
+            var directionsRenderer = new google.maps.DirectionsRenderer();
+            var request = {
+                origin: latlng_now,
+                destination: latlng, 
+                travelMode: google.maps.DirectionsTravelMode.DRIVING,
+            }; 
+
+            directionsService.route(request, function(result, status) {
+                if (status == google.maps.DirectionsStatus.OK) {
+                    directionsRenderer.setOptions({
+                        polylineOptions: {
+                            strokeColor: '#1a73e8'
+                        }
+                    });
+                    
+                    var routes = result.routes[0]
+                    var duration = routes.legs[0].duration
+                    var distance = routes.legs[0].distance
+                    var summary = routes.summary
+                    summary = summary.substr(0, summary.indexOf('/'));
+                    var durationText = duration.text
+                    var distanceText = distance.text
+                    var geocoder = new google.maps.Geocoder();
+                    geocoder.geocode( { 'address': summary,'region': 'jp'}, function(results, status) {
+                        if (status == 'OK') {
+                            var summaryLat = results[0].geometry.location;
+                            var infowindow = new google.maps.InfoWindow({
+                                content: '所要時間' + ':' + durationText + '<br>' + '距離' + ':' + distanceText,
+                                position: summaryLat,
+                            });
+                            infowindow.open(map);
+                        } else {
+                            alert('Geocode was not successful for the following reason: ' + status);
+                        }
+                    });
+                    directionsRenderer.setDirections(result);
+                    directionsRenderer.setMap(map);
+
+                    
+                }
+            });
+        }
+        function fail(error) {
+            alert('位置情報の取得に失敗しました。エラーコード：' + error.code);
+            var latlng = new google.maps.LatLng(35.6812405, 139.7649361); //東京駅
+            var map = new google.maps.Map(document.getElementById('maps'), {
+                zoom: 10,
+                center: latlng
+            });
+        }
+        navigator.geolocation.getCurrentPosition(success, fail);
+    }
+
+    const imgBoxList = document.getElementsByClassName('post-img-box');
+    
+    $.each(imgBoxList, function(i, v) {
+        console.log(i)
+        console.log(v)
+        if(0 == i) {
+            $(v).css('display', 'flex')
+            $('#btn_left').css('display', 'none')
+        } 
+        $(v).attr('id', `${i+1}`)
+        const img = $(v).children('img');
+        const imgSrc = img.attr('src');
+        const height = $(img).height();
+        const width = $(img).width();
+
+        if(height < width) {
+            $(img).replaceWith(`<img src="${imgSrc}" alt="" width="100%">`);
+        } else {
+            $(img).replaceWith(`<img src="${imgSrc}" alt="" height="100%">`);
+        }
+
+    });
+
+    if(imgBoxList.length == 1) {
+        $('#btn_right').css('display', 'none');
+    }
+
+
+    $(document).on('click', '#btn_left', function() {
+        const parent = $(this).parent();
+        const parentId = parent.attr('id');
+        const parentIdPlus = Number(parentId) - 1;
+        parent.css('display', 'none');
+        $(`#${parentIdPlus}`).css('display', 'flex');
+        
+        if(0 == parentIdPlus) {
+            $(`#${parentIdPlus} #btn_right`).css('display', 'none');
+        }
+    });
+
+    $(document).on('click', '#btn_right', function() {
+        const parent = $(this).parent();
+        const parentId = parent.attr('id');
+        const parentIdPlus = Number(parentId) + 1;
+        parent.css('display', 'none');
+        $(`#${parentIdPlus}`).css('display', 'flex');
+        const img = $(`#${parentIdPlus}`).children('img');
+        const imgSrc = img.attr('src');
+        const height = $(img).height();
+        const width = $(img).width();
+        if(height < width) {
+            $(img).replaceWith(`<img src="${imgSrc}" alt="" width="100%">`);
+        } else {
+            $(img).replaceWith(`<img src="${imgSrc}" alt="" height="100%">`);
+        }
+        if(imgBoxList.length == parentIdPlus) {
+            $(`#${parentIdPlus} #btn_right`).css('display', 'none');
+            
+        }
+    });
+
+   
+
+
+
+    const showLikedUsers = () => {
+        modalResize();
+        document.getElementById('pluc').classList.add('show')
+        const scrollY = document.documentElement.style.getPropertyValue('--scroll-y');
+        console.log(scrollY)
+        const body = document.body;
+        body.style.position = 'fixed';
+        body.style.top = `-${scrollY}`;
+        $(window).resize(modalResize);
+        function modalResize(){
+            var w = $(window).width();
+            var h = $(window).height();
+            var cw = $("#pluc").outerWidth();
+            var ch = $("#pluc").outerHeight();
+            $("#pluc").css({
+                "left": ((w - cw)/2) + "px",
+                "top": ((h - ch)/2) + "px"
+            });
+        }
+    };
+
+    const closeLikedUsers = () => {
+        const body = document.body;
+        const scrollY = body.style.top;
+        body.style.position = '';
+        body.style.top = '';
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+        document.getElementById('pluc').classList.remove('show');
+    }
+
+    window.addEventListener('scroll', () => {
+        document.documentElement.style.setProperty('--scroll-y', `${window.scrollY}px`);
+    });
+
+
+    $('.reply').click(function(){
+        const commentUser = $(this).attr('id');
+        console.log(commentUser)
+        $('.reply-textbox').val('@' + commentUser + ' ')
+    });
+
+    function commentReplyToggle(parent_id) {
+        $('.parent-pk').attr('value', `${parent_id}`)
+        if ($('.reply-form').hasClass('d-none')) {
+            $('.comment-form').addClass('d-none');
+            $('.reply-form').removeClass('d-none');
+        } else {
+            
+            $('.comment-form').addClass('d-none');
+        }
+    }
+
+    
+    $(function(){
+        var $dropdown = $('.message-dropdown');
+        var DURATION = 200; 
+        function fadeOutMenu(){
+            $dropdown.removeClass('is-active').next('.message-dropdown-menu').stop().slideUp(DURATION);
+        }
+        function toggleMenu(){
+            var $self = $(this);
+            if(!$self.hasClass('is-active')){
+                fadeOutMenu();
+            }
+            $self.toggleClass('is-active').next('.message-dropdown-menu').stop().slideToggle(DURATION);
+        }
+        $dropdown.on('click', toggleMenu);
+        $(document).on('click touchend', function(event) {
+            if (!$(event.target).closest('.message-dropdown').length) {
+                fadeOutMenu();
+            }
+        });          
+    });
+
+    $(function(){
+        var $dropdown = $('.reply-dropdown');
+        var DURATION = 200; 
+        function fadeOutMenu(){
+            $dropdown.removeClass('is-active').next('.reply-dropdown-menu').stop().slideUp(DURATION);
+        }
+        function toggleMenu(){
+            var $self = $(this);
+            if(!$self.hasClass('is-active')){
+                fadeOutMenu();
+            }
+            $self.toggleClass('is-active').next('.reply-dropdown-menu').stop().slideToggle(DURATION);
+        }
+        $dropdown.on('click', toggleMenu);
+        $(document).on('click touchend', function(event) {
+            if (!$(event.target).closest('.reply-dropdown').length) {
+                fadeOutMenu();
+            }
+        });          
+    });
+
+    google.maps.event.addDomListener(window, 'load', function()
+    {
+        // オプションの指定
+        var mapOptions = {
+            zoom: 15,                                             // 地図の初期表示の拡大率
+            center: new google.maps.LatLng(35.68869, 139.814157), // 地図の中心点の座標（緯度・経度）
+            mapTypeId: google.maps.MapTypeId.ROADMAP              // MAPタイプの指定
+        };
+        // MAPオブジェクトの作成
+        var mapObj = new google.maps.Map(document.getElementById('brisk-map'), mapOptions);
+    });
+
+
+    $(function() {
+        if ($('.comment-wrapper').height() > 240) {
+            $('.comment-wrapper').addClass('comment-wrapper-resize');
+        }
+    });
+    
+
+    
+
+    
+
+    
+</script>
+
+
+{% endblock content %}

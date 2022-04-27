@@ -1,0 +1,140 @@
+{% load post_extras %}
+
+<style>
+    .noti-container {
+        padding: 15px;
+        
+    }
+
+    .noti-column {
+        display: grid;
+        grid-template-columns: 1fr 9fr 2fr;
+        margin: 16px 0;
+        
+    }
+
+    .noti-pdiv {
+        height: 2em;
+        position: relative;
+    }
+
+    .noti-pdiv p {
+        font-size: 14px;
+        text-align: left;
+        margin: 0 0 0 10px;
+        position: absolute;               
+        top: 73%;                       
+        transform: translate(0, -50%)
+
+    }
+</style>
+
+
+<div class="noti-container">
+    {% if notifications.count == 0 %}
+    <h3>No notification</h3>
+    {% else %}
+    {% for notification in notifications %}
+        {% if notification.server != request.user and notification.receiver == request.user %}
+            {% if notification.value == 'message' %}
+            <div class="noti-column">
+                
+                <div>
+                    <a href="{% url 'user-profile' notification.server  %}"><img src="{{notification.server.avatar.url}}" width="44" height="44" alt="" style="border-radius: 50%; border: 1px solid lightgray;"></a>
+                </div>
+                <div class="noti-pdiv">
+                    <p><a href="{% url 'post' notification.post %}">{{notification.server}}があなたの投稿にコメントしました。{{notification.created|timesince|split_timesince:',' }}前</a></p>
+                </div>
+                <div>
+                    {% for img in notification.post.img.all %}
+                    {% if forloop.counter == 1 %}
+                    <a href="{% url 'post' notification.post %}"><img src="{{img.image.url}}" alt="" width="40" height="40"></a>
+                    {% endif %}
+                    {% endfor %} 
+                </div>
+            
+            </div>
+            
+            {% elif notification.value == 'like' %}
+            <div class="noti-column">
+                <div>
+                    <a href="{% url 'user-profile' notification.server  %}"><img src="{{notification.server.avatar.url}}" width="44" height="44" alt="" style="border-radius: 50%; border: 1px solid lightgray;"></a>
+                </div>
+                <div class="noti-pdiv">
+                    <p><a href="{% url 'post' notification.post %}">{{notification.server}}があなたの投稿にいいねしました。{{notification.created|timesince|split_timesince:',' }}前</a></p>
+                </div>
+                <div>
+                    {% for img in notification.post.img.all %}
+                    {% if forloop.counter == 1 %}
+                    <a href="{% url 'post' notification.post %}"><img src="{{img.image.url}}" alt="" width="40" height="40"></a>
+                    {% endif %}
+                    {% endfor %} 
+                </div>
+            </div>
+            {% elif notification.value == 'follower' %}
+            <div class="noti-column">
+                <div>
+                    <a href="{% url 'user-profile' notification.server  %}"><img src="{{notification.server.avatar.url}}" width="44" height="44" alt="" style="border-radius: 50%; border: 1px solid lightgray;"></a>
+                </div>
+                <div class="noti-pdiv">
+                    <p><a href="{% url 'user-profile' notification.server  %}">{{notification.server}}があなたをフォローしました。{{notification.created|timesince|split_timesince:',' }}前</a></p>
+                </div>
+                <div class="noti-follow">
+                    {% if notification.server in active_profile %}
+                    <form action="{% url 'follow-unfollow-view' %}" class="nsp-form" method="POST" id={{notification.server.pk}}>
+                        {% csrf_token %}
+                        <input type="hidden" name="nsp" value="{{notification.server.pk}}">
+                        <button type="submit" class="nsp-btn{{notification.server.pk}} unfollow" id="{{request.user.pk}}">Unfollow</button>
+                    </form>
+                    {% else %}
+                    <form action="{% url 'follow-unfollow-view' %}" class="nsp-form" method="POST" id={{notification.server.pk}}>
+                        {% csrf_token %}
+                        <input type="hidden" name="" value="{{fnotification.server.pk}}">
+                        <button type="submit" class="nsp-btn{{notification.server.pk}} follow" id="{{request.user.pk}}">Follow</button>
+                    </form>
+                    {% endif %} 
+                </div>
+            </div>
+            {% elif notification.value == 'reply' %}
+                
+                <div class="noti-column">
+                    <div>
+                        <a href="{% url 'user-profile' notification.server  %}"><img src="{{notification.server.avatar.url}}" width="44" height="44" alt="" style="border-radius: 50%; border: 1px solid lightgray;"></a>
+                    </div>
+                    <div class="noti-pdiv">
+                        <p><a href="{% url 'post' notification.post %}">{{notification.server}}があなたのコメントに返信しました。{{notification.created|timesince|split_timesince:',' }}前</a></p>
+                    </div>
+                    {% for img in notification.post.img.all %}
+                    {% if forloop.counter == 1 %}
+                    <a href="{% url 'post' notification.post %}"><img src="{{img.image.url}}" alt="" width="40" height="40"></a>
+                    {% endif %}
+                    {% endfor %} 
+                </div>
+            {% elif notification.value == 'mention' %}
+                
+                <div class="noti-column">
+                    <div>
+                        <a href="{% url 'user-profile' notification.server  %}"><img src="{{notification.server.avatar.url}}" width="44" height="44" alt="" style="border-radius: 50%; border: 1px solid lightgray;"></a>
+                    </div>
+                    <div class="noti-pdiv">
+                        <p><a href="{% url 'post' notification.post %}">{{notification.server}}があなたをメンションしました。{{notification.created|timesince|split_timesince:',' }}前</a></p>
+                    </div>
+                    {% for img in notification.post.img.all %}
+                    {% if forloop.counter == 1 %}
+                    <a href="{% url 'post' notification.post %}"><img src="{{img.image.url}}" alt="" width="40" height="40"></a>
+                    {% endif %}
+                    {% endfor %} 
+                </div>
+                
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    {% endif %}
+    
+    
+    
+</div>
+<script>
+    
+</script>
+

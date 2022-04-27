@@ -1,0 +1,52 @@
+{% extends "main.html" %}
+{% block content %}
+
+<div class="delete-modal dm-none" id="delete-modal">
+    {% include "base/delete.html" %}
+</div>
+
+
+<div>
+    <div class="home-container">
+        <div>
+            {% include "base/search_component.html" %}
+        </div>
+        {% if '?q=' in path %}
+        <div class="home-post-container ">
+            <div class="inq-content inq-infinite-container">
+                {% include "base/in_q.html" %}
+            </div>
+            
+        </div>
+        {% else %}
+        <div class="home-post-container">
+            <div>
+                <p>フォローしているユーザー</p>
+                
+                <div class="fup-content fup-infinite-container">
+                    
+                    {% include "base/follow_users_posts.html" %}
+                </div>
+            </div>
+            <div>
+                <p>あなたが興味ありそうな投稿</p>
+
+                <div class="ip-content ip-infinite-container">
+
+                    {% include "base/interest_posts.html" %}
+                </div>
+            </div>
+            
+
+        </div>
+        {% endif %}
+        
+        
+        
+    </div>
+    
+</div>
+
+
+
+{% endblock content %}

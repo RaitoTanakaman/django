@@ -1,0 +1,42 @@
+{% load static %}
+<div class="plu-bg" id="close" onClick='closeLikedUsers()'></div>
+<div>
+    <div class="plu-content">
+        <div class="plu-body-container">
+        <div class="plu-body">
+            {% for post_liked_user in post_liked_users %}
+                <div class="plu-flex">
+                    <div class="plu-b-left">
+                        <a href="{% url 'user-profile' post_liked_user.username %}">
+                            <img src="{{post_liked_user.avatar.url}}" alt="" width="48px" height="48px" style=" vertical-align: top; border-radius: 50%; border: 1px solid gray;" >
+                        </a>
+                        <div style="display: inline-block;">
+                            <a href="{% url 'user-profile' post_liked_user.username %}"><strong>{{post_liked_user.username}}</strong></a>
+                            <p style="margin: 0; line-height: 15px; color: gray; font-size: 15px;">{{post_liked_user.name}}</p>
+                            <p style="margin: 0; font-size: 15px; letter-spacing: 1px;">{{post_liked_user.bio}}</p>
+                        </div>
+                    </div>
+                        
+                    <div class="plu-b-right">
+                        {% if post_liked_user != request.user %}
+                            {% if post_liked_user in user_following %}
+                            <form action="{% url 'follow-unfollow-view' %}" class="plu-form" method="POST" id={{post_liked_user.pk}}>
+                                {% csrf_token %}
+                                <input type="hidden" name="plu_pk" value="{{post_liked_user.pk}}">
+                                <button type="submit" class="plu-btn{{post_liked_user.pk}} unfollow" id="{{request.user.pk}}">Unfollow</button>
+                            </form>
+                            {% else %}
+                            <form action="{% url 'follow-unfollow-view' %}" class="plu-form" method="POST" id={{post_liked_user.pk}}>
+                                {% csrf_token %}
+                                <input type="hidden" name="" value="{{post_liked_user.pk}}">
+                                <button type="submit" class="plu-btn{{post_liked_user.pk}} follow">Follow</button>
+                            </form>
+                            {% endif %}
+                        {% endif %} 
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>

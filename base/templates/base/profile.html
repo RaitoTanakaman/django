@@ -1,0 +1,131 @@
+{% extends "main.html" %}
+{% load post_extras %}
+
+
+{% block content %}
+<!-- following-modal -->
+<div class="following-modal fm-none" id="following-modal">
+    {% include "base/following.html" %}
+    
+</div>
+
+<!-- follower-modal -->
+<div class="follower-modal fm-none" id="follower-modal">
+    {% include "base/follower.html" %}
+</div>
+
+<!-- delete-modal -->
+<div class="delete-modal dm-none" id="delete-modal">
+    {% include "base/delete.html" %}
+</div>
+
+
+
+<div class="home-container">
+    <div>
+        {% include "base/search_component.html" %}
+    </div>
+    <div class="post-container">
+        <h1>{{user.name}}</h1>
+        <p>@{{user.username}}</p>
+        <div class="fc" style="display: flex;">
+            <a href="#"  id="following" style="margin-right: 30px;" onClick="showFollowingModal()">
+                Following : <p class="following-count{{user_pk}}" style="display: inline;">{{main_profile.num_following}}</p>
+                
+            </a>
+            <a href="#"  id="follower" onClick='showFollowerModal()'>
+                Follower : 
+                <p class="follower-count{{user_pk}}" style="display: inline;">{{main_profile.num_follower}}</p> 
+            </a>  
+        </div>
+        
+        {% if  request.user.username not in request.path %}
+            {% if user in active_profile %}
+            <form action="{% url 'follow-unfollow-view' %}" class="follow-form" method="POST" id={{user_pk}}>
+                {% csrf_token %}
+                <input type="hidden" name="" value="{{user_pk}}">
+                <button type="submit" class="follow-btn{{user_pk}} unfollow">Unfollow</button>
+            </form>
+            {% else %}
+            <form action="{% url 'follow-unfollow-view' %}" class="follow-form" method="POST" id={{user_pk}}>
+                {% csrf_token %}
+                <input type="hidden" name="" value="{{user_pk}}">
+                <button type="submit" class="follow-btn{{user_pk}} follow">Follow</button>
+            </form>
+            {% endif %} 
+        {% endif %}
+        {% if request.user == user %}
+                <p><a href="{% url 'update-user' %}"><i class="fas fa-user-edit" style="padding-right: 10px; color: gray;"></i>プロフィールを変更</a></p>
+        {% endif %}
+        
+        <div class="profile-content profile-infinite-container">
+        {% for post in posts %}
+            <div class="profile-post-room profile-infinite-item">
+                <div class="post-room-container" style="margin: 0;">
+                    <div class="post-room-img">
+                        
+                    {% for post_image in post.img.all %}
+                        {% if forloop.counter == 1 %}
+                        <img src="{{post_image.image.url}}" alt="" style="margin: 0 auto;" id="image">
+                        {% endif %}
+                    {% endfor %}
+                        
+                        
+                    </div>
+                    {% if request.user == post.host %}
+                        <ul class="menu_list" style="padding-left: 0;">
+                            <li class="nav_item">
+                                <p class="js-dropdown" style="margin: 0;  cursor: pointer;"><i class="fas fa-ellipsis-h" style="color: gray;"></i></p>
+                                <div class="panel js-dropdown-menu" style="z-index: 100;">
+                                    <ul class="panel-inner">
+                                        <li class="panel_item"><i class="fas fa-edit" style="padding-right: 10px; color: gray;"></i><a href="{% url 'update-post' post.pk %}">Edit</a></li>
+                                        <li class="panel_item" onClick="showDeleteModal()"><i class="fas fa-trash-alt" style="padding-right: 10px; color: gray;"></i>Delete</li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    {% endif %}
+                    <div class="post-room-under">
+                        <h4 style="margin:5px 0 7px 0;width: 86%;"><a href="{% url 'post' post.id %}" style="color: #333; letter-spacing: 0.5px;">{{post.title}}</a></h4>
+                        <div class="post-user">
+                            <a href="{% url 'user-profile' post.host %}">
+                                <img src="{{post.host.avatar.url}}" alt="" width="20px" height="20px" style=" vertical-align: top; border-radius: 50%; border: 1px solid lightgray;" >
+                                <p><small>@{{post.host.username | truncatechars:10}}</small></p>
+                            </a>
+                        </div>
+                        <div class="like-mrk">
+                            <p class="like-btn{{post.id}} like-design" id={{post.id}}>
+                                {% if request.user not in post.liked.all %}
+                                <i class="fas fa-heart heart-gray" style="font-size: 18px;"></i>
+                                {% else %}
+                                <i class="fas fa-heart heart-red" style="font-size: 18px"></i>
+                                {% endif %}
+                            </p>
+                            <div class="ui grid">
+                                <div class="column">
+                                    いいね！
+                                </div>
+                                <div class="column post-timesince">
+                                    <div class="like-count{{post.id}} lc">{{post.num_likes}}</div>件 ・<span>{{post.created|timesince|split_timesince:","}}前</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="post-data">
+                            <p>{{post.place}} {{post.city}}</p>
+                            <p>{{post.campsite.campsite}}</p>
+                            <p>{{post.category}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+        {% endfor %}
+        </div>
+        {% if page_obj.has_next %}
+        <a class="profile-infinite-more-link" href="page={{page_obj.next_page_number}}">さらに読み込む</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}
+
+

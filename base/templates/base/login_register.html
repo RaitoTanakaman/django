@@ -1,0 +1,102 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+<style>
+    .login-content {
+        left: 50%;
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%,-50%);
+        width: 30%;
+        box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, 0.1);
+        border-radius: 6px;
+        padding: 30px;
+        
+    }
+
+    .login-username input, .login-password input{
+        height: 20px;
+        width: 97%;
+        margin: 0 auto 16px auto;
+        border: 1px solid lightgray;
+        border-radius: 5px;
+        padding: 10px 0 10px 10px;
+        letter-spacing: 0.5px;
+    }
+
+    .submit-input input{
+        height: 40px;
+        width: 50%;
+        padding-left: 0px;
+        border-radius: 30px;
+        background-color: rgb(54, 230, 0);
+        border: none;
+        color: #fff;
+    }
+
+    .login-username {
+        margin-top: 90px;
+    }
+
+    .login-content p {
+        margin: 0 0 7px 0;
+        font-size: 14px;
+        
+    }
+</style>
+
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+{% if page == 'login' %}
+
+    <div class="login-content">
+        <div class="logo-container" style="top: 30px; left: 31%;">
+            <img src="/images/camgo.png" alt="Camgo logo" width="64" height="64">
+            <h4>Camgo</h4>
+        </div>
+        
+        <div class="login-room">
+            <form action="" method="POST">
+                {% csrf_token %}
+                <div class="login-username">
+                    <p>Username</p>
+                    <input type="text" name="username">
+                </div>
+                
+                <div class="login-password">
+                    <p>Password</p>
+                    <input type="password" name="password">
+                </div>
+                
+                <div class="submit-input"><input type="submit" value="Login"></div>
+                
+            </form>
+            <p>アカウントを新しく作りますか？</p>
+            <a href="{% url 'register' %}">サインアップ</a>
+        </div>
+        
+    </div>
+
+
+{% else %}
+<div>
+    <form action="" method="POST">
+        {% csrf_token %}
+        {{form.as_p}}
+        <input type="submit" value="Register">
+    </form>
+    <p>すでにアカウントをお持ちですか？</p>
+    <a href="{% url 'login' %}">ログイン</a>
+</div>
+{% endif %}
+
+
+
+{% endblock content %}

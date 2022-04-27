@@ -1,0 +1,42 @@
+
+{% block content %}
+    <h3>どこ行く？</h3>
+    <div class="search-container">
+        <div class="search-box">
+        {% for local in locals %}
+            <ul class="local-ul">
+                <li class="local-li">
+                    <div class="local-li-content">
+                    <a class="local-a" href="{% url 'home' %}?q={{local.local}}">{{local.local}}</a>
+                    <div class="place-ul-container sear-none">
+                    {% for place in local.place_set.all %}
+                    <ul class="place-ul">
+                        <li class="place-li">
+                            <div class="place-li-content">
+                            <a class="place-a" href="{% url 'home' %}?q={{place.name}}">{{place.name}}</a>
+                            <div class="city-ul-container sear-none">
+                            {% for city in place.city_set.all %}
+                            <ul class="city-ul">
+                                <li class="city-li">
+                                    <a class="city-a" href="{% url 'home' %}?q={{city.city}}">{{city.city}}</a>
+                                </li>
+                            </ul>
+                            {% endfor %}
+                            </div>
+                            </div>
+                        </li>
+                    </ul>
+                    {% endfor %}
+                    </div>
+                    </div>
+                    
+                </li>
+            </ul>
+        {% endfor %}
+        </div>
+    </div>
+    
+    {% for place in places %}
+        <p><a href="{% url 'home' %}?q={{place.name}}">{{place.name}}</a></p>
+    {% endfor %}
+{% endblock content %}

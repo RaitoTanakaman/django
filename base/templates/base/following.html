@@ -1,0 +1,43 @@
+<div class="fm-bg" id="close" onClick='closeFollowingModal()'></div>
+    <div class="fm-content">
+        <div class="fm-top">
+            <h3 style="margin: 0;">Following</h3>
+            <i class="fas fa-times close" onClick='closeFollowingModal()' style="padding-top: 4px; font-size: 20px;"></i>
+        </div>
+        <div class="fm-body-container">
+        <div class="fm-body">
+        {% for fp in profile_user.following.all %}
+            <div class="fm-flex">
+                <div class="fm-b-left">
+                    <a href="{% url 'user-profile' fp.username %}">
+                        <img src="{{fp.avatar.url}}" alt="" width="48px" height="48px" style=" vertical-align: top; border-radius: 50%; border: 1px solid gray;" >
+                    </a>
+                    <div style="display: inline-block;">
+                        <a href="{% url 'user-profile' fp.username %}" style="color: #000; font-size: 15px;"><strong>{{fp.username}}</strong></a>
+                        <p style="margin: 0; line-height: 15px; color: gray; font-size: 15px;">{{fp.name}}</p>
+                        <p style="margin: 0; font-size: 15px; letter-spacing: 1px;">{{fp.bio}}</p>
+                    </div>
+                </div>
+                    
+                <div class="fm-b-right">
+                    {% if fp != request.user %}
+                        {% if fp in active_profile %}
+                        <form action="{% url 'follow-unfollow-view' %}" class="fm-form" method="POST" id={{fp.pk}}>
+                            {% csrf_token %}
+                            <input type="hidden" name="fp_pk" value="{{fp.pk}}">
+                            <button type="submit" class="fm-btn{{fp.pk}} unfollow" id="{{request.user.pk}}">Unfollow</button>
+                        </form>
+                        {% else %}
+                        <form action="{% url 'follow-unfollow-view' %}" class="fm-form" method="POST" id={{fp.pk}}>
+                            {% csrf_token %}
+                            <input type="hidden" name="" value="{{fp.pk}}">
+                            <button type="submit" class="fm-btn{{fp.k}} follow">Follow</button>
+                        </form>
+                        {% endif %}
+                    {% endif %} 
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+    </div>

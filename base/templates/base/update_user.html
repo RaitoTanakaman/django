@@ -1,0 +1,151 @@
+{% extends "main.html" %}
+
+{% block content %}
+<style>
+    .update-user-content {
+        width: 70%;
+        margin: 0 auto;
+        border: 1px solid lightgray;
+        padding: 30px;
+    }
+
+    .avatar-modal {
+        display: none;
+        position: absolute;
+        height: 40%;
+        width: 100%;
+        z-index: 30;
+    }
+
+    .modal__bg {
+        background: rgba(0,0,0,0.6);
+        height: 1000vh;
+        position: absolute;
+        width: 100%;
+        top: 0;
+        left: 0;
+    }
+
+    .modal__content{
+        background: #fff;
+        left: 50%;
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%,-50%);
+        width: 40%;
+        border-radius: 10px;
+        z-index: 50;
+    }
+
+
+    .show {
+        display: block;
+        position: fixed;
+    }
+
+</style>
+
+<div class="avatar-modal" id="avatar_modal">
+    <div class="modal__bg" id="bg" onclick="closeAvatarModal()"></div>
+    <div class="modal__content">
+        <ul>
+            <li id="select_avatar" onclick="closeAvatarModal()">
+                <form action="" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <!-- <input type="file" id="file_upload" name="file-upload" style="display: none;" enctype="multipart/form-data"> -->
+                    <input type="file" name="avatar" accept="image/*" style="display: none;" id="id_avatar">
+                    <p id="open">写真をアップロードする</p>
+                </form>
+            </li>
+            <li>
+                <form action="" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="delete-avatar" value="{{user.avatar.url}}">
+                    <button type="submit">delete avatar</button>
+                </form>
+                
+            </li>
+        </ul>
+    </div>
+    
+</div>
+
+<div class="update-user-content">
+    <div class="avatar">     
+        <img src="{{request.user.avatar.url}}" alt="" width="50" height="50" style="object-fit: cover;">
+        <p onclick="showAvatarModal()">画像を変更する</p>
+    </div>
+   
+    <form action="" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="name-room">
+            <p>Name</p>
+            <input type="text" name="name" value="{{request.user.name}}">
+        </div>
+        <div class="username-room">
+            <p>Username</p>
+            <input type="text" name="username" value="{{request.user.username}}">
+        </div>
+        <div class="bio-room">
+            <p>Bio</p>
+            <input type="text" name="bio" value="{{request.user.bio}}">
+        </div>
+        <div>
+            <a href="{% url 'user-profile' user.username %}">Cancel</a>
+            <button type="submit">Update</button>
+        </div>
+        
+    </form>
+</div>
+<script>
+    const showAvatarModal = () => {
+        modalResize();
+        document.getElementById('avatar_modal').classList.add('show')
+        const scrollY = document.documentElement.style.getPropertyValue('--scroll-y');
+        console.log(scrollY)
+        document.getElementById('bg').style.top = '-300px'
+        const body = document.body;
+        body.style.position = 'fixed';
+        body.style.top = `-${scrollY}`;
+
+        $(window).resize(modalResize);
+        function modalResize(){
+            var w = $(window).width();
+            var h = $(window).height();
+            var cw = $("#avatar_modal").outerWidth();
+            var ch = $("#avatar_modal").outerHeight();
+            $("#avatar_modal").css({
+                "left": ((w - cw)/2) + "px",
+                "top": ((h - ch)/2) + "px"
+            });
+        }
+    };
+
+    const closeAvatarModal = () => {
+        const body = document.body;
+        const scrollY = body.style.top;
+        body.style.position = '';
+        body.style.top = '';
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+        document.getElementById('avatar_modal').classList.remove('show');
+    }
+
+    window.addEventListener('scroll', () => {
+        document.documentElement.style.setProperty('--scroll-y', `${window.scrollY}px`);
+    });
+
+    $('#open').click(function(){
+        $("#id_avatar").click();
+        return false;
+    })
+
+    $("#id_avatar").change(function () {
+        $(this).closest("form").submit();
+        return false;
+    });
+    
+
+    
+</script>
+{% endblock content %}
